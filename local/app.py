@@ -216,10 +216,10 @@ def _section_label(parent, text):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Comic Enhancer")
+        self.title("InkReady")
         self.resizable(True, True)
         self.minsize(600, 0)
-        self.geometry("720x700")
+        self.geometry("720x720")
         self._prefs = load_prefs()
         self._build_ui()
         self._load_saved_state()
@@ -231,7 +231,7 @@ class App(tk.Tk):
         outer.pack(fill="both", expand=True, padx=24, pady=20)
 
         # Header
-        ttk.Label(outer, text="Comic Enhancer", font=F_TITLE).pack(anchor="w")
+        ttk.Label(outer, text="InkReady", font=F_TITLE).pack(anchor="w")
         ttk.Label(
             outer, text="Batch-optimize EPUBs for your e-reader",
             font=F_SMALL, foreground=C_MUTED
