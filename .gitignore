@@ -1,2 +1,8 @@
 .DS_Store
 */.DS_Store
+build/mac/
+build/windows/
+build/linux/
+src/dist/
+src/build/
+*.spec
