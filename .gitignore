@@ -6,3 +6,4 @@ build/linux/
 src/dist/
 src/build/
 *.spec
+assets/icon.iconset/

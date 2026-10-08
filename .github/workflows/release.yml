@@ -39,7 +39,7 @@ jobs:
         if: runner.os == 'macOS'
         working-directory: src
         run: |
-          pyinstaller --name InkReady --windowed --onedir --collect-all PIL --clean app.py
+          pyinstaller --name InkReady --windowed --onedir --collect-all PIL --icon ../assets/icon.icns --clean app.py
           ${{ matrix.pack }}
 
       - name: Build (Windows)
@@ -47,7 +47,7 @@ jobs:
         working-directory: src
         shell: cmd
         run: |
-          pyinstaller --name InkReady --windowed --onefile --collect-all PIL --clean app.py
+          pyinstaller --name InkReady --windowed --onefile --collect-all PIL --icon ..\assets\icon.ico --clean app.py
           ${{ matrix.pack }}
 
       - name: Build (Linux)
