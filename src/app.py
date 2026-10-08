@@ -315,7 +315,6 @@ def process_files(
 
     for i, file_path in enumerate(files, 1):
         filename = os.path.basename(file_path)
-        q.put((i, total, filename))
 
         temp_dir = tempfile.mkdtemp()
         try:
@@ -329,9 +328,11 @@ def process_files(
                     if os.path.splitext(f)[1].lower() in _IMAGE_EXTS:
                         img_files.append(os.path.join(root, f))
 
-            # 3. Process each image in-place inside the temp directory
-            for img_path in img_files:
+            # 3. Process each image, sending per-image progress updates
+            n_imgs = len(img_files)
+            for j, img_path in enumerate(img_files, 1):
                 _process_image(img_path, preset, sliders)
+                q.put(("progress", i, total, filename, j, n_imgs))
 
             # 4. Repack and write to output directory
             out_path = os.path.join(output_dir, filename)
@@ -648,12 +649,13 @@ class App(tk.Tk):
                     self.process_btn.config(state="normal")
                     return
 
-                else:
-                    current, total, filename = msg
-                    pct = (current - 1) / total * 100
+                elif kind == "progress":
+                    _, file_i, total_files, filename, img_j, n_imgs = msg
+                    # overall pct: completed files + fraction through current file
+                    pct = ((file_i - 1) + img_j / max(n_imgs, 1)) / total_files * 100
                     self.progress_var.set(pct)
                     short = filename if len(filename) <= 44 else "…" + filename[-41:]
-                    self.status_var.set(f"{current} of {total}  —  {short}")
+                    self.status_var.set(f"{int(pct)}% done  —  {short}")
 
         except queue.Empty:
             pass
