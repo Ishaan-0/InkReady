@@ -1,0 +1,81 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: InkReady.app
+            archive: InkReady-mac.zip
+            pack: zip -r ../InkReady-mac.zip InkReady.app
+          - os: windows-latest
+            artifact: InkReady.exe
+            archive: InkReady-windows.exe
+            pack: copy dist\InkReady.exe ..\InkReady-windows.exe
+          - os: ubuntu-latest
+            artifact: InkReady
+            archive: InkReady-linux
+            pack: cp dist/InkReady ../InkReady-linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r src/requirements.txt
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        working-directory: src
+        run: |
+          pyinstaller --name InkReady --windowed --onedir --clean app.py
+          ${{ matrix.pack }}
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        working-directory: src
+        shell: cmd
+        run: |
+          pyinstaller --name InkReady --windowed --onefile --clean app.py
+          ${{ matrix.pack }}
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        working-directory: src
+        run: |
+          pyinstaller --name InkReady --onefile --clean app.py
+          ${{ matrix.pack }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive }}
+          path: ${{ matrix.archive }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            InkReady-mac.zip/InkReady-mac.zip
+            InkReady-windows.exe/InkReady-windows.exe
+            InkReady-linux/InkReady-linux
+          generate_release_notes: true
